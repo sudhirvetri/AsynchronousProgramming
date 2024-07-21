@@ -4,11 +4,12 @@ using System.Net;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         Console.WriteLine("Hello, World!");
         var watch = System.Diagnostics.Stopwatch.StartNew();
-        RunDownloadSync();
+        // RunDownloadSync();
+        await RunDownloadAsync();
         watch.Stop();
         var elapsedms = watch.ElapsedMilliseconds;
         Console.WriteLine("elapsedms:" + elapsedms);
@@ -40,6 +41,18 @@ class Program
         return output;
     }
 
+    private static async Task<WebsiteDataModel> DownloadWebsiteAsync(string websiteURL)
+    {
+        WebsiteDataModel output = new WebsiteDataModel();
+        using (WebClient client = new WebClient())
+        {
+            output.WebsiteUrl = websiteURL;
+            output.WebsiteData = await client.DownloadStringTaskAsync(websiteURL);
+        }
+
+        return output;
+    }
+
     private static void ReportWebsiteInfo(WebsiteDataModel data)
     {
         var result = $"{data.WebsiteUrl} downloaded: {data.WebsiteData.Length} characters long.{Environment.NewLine}";
@@ -55,6 +68,22 @@ class Program
             WebsiteDataModel results = DownloadWebsite(site);
             ReportWebsiteInfo(results);
         }
+    }
+
+    private static async Task RunDownloadAsync()
+    {
+        List<string> websites = PrepData();
+        List<Task<WebsiteDataModel>> tasks = new List<Task<WebsiteDataModel>>();
+        foreach (string site in websites)
+        {
+            tasks.Add(DownloadWebsiteAsync(site));
+        }
+        var results = await Task.WhenAll(tasks);
+        foreach (var item in results)
+        {
+            ReportWebsiteInfo(item);
+        }
+
     }
 }
 
