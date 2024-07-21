@@ -1,0 +1,9 @@
+# Ignore compiled binaries
+*.dll
+*.pdb
+
+# Ignore build output directories
+bin/
+obj/
+AsynchronousProgramming/bin/
+AsynchronousProgramming/obj/
